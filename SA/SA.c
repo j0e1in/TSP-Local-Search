@@ -85,7 +85,7 @@ float SimulatedAnnealing(float **dist, int dim)
 
   no_improve = 0;
   iter = 0;
-  while(no_improve < 200)
+  while(no_improve < 600)
   {
     temp = schedule(temp, iter);
     iter++;
