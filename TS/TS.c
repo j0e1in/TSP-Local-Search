@@ -184,7 +184,7 @@ int main(int argc, char const *argv[])
   float opt_value;
   float prec_err;
   float **dist;
-  float best_dist = 0;
+  float best_dist;
   char header[LINE_LEN];
   char *tmp;
 
