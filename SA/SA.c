@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#include "City.h"
+#include "../common/city.h"
 
 #define ITER_TIMES 3
 #define MAX_TEMP 99
@@ -163,7 +163,7 @@ int main(int argc, char const *argv[])
     printf("ERROR: missing input argument\n");
   }
 
-  fw = fopen("output", "w");
+  fw = fopen("result.txt", "w");
 
   // READ HEADER
   for (i = 0; i < 5; ++i)

@@ -1,6 +1,13 @@
-all: TS.c City.c City.h
-		gcc -c -Wall TS.c -o TS.o
-		gcc -c -Wall City.c -o City.o
-		ld -r TS.o City.o -o final.o
-		gcc -g -Wall final.o -lm
-		rm TS.o City.o final.o
+COMMON = "../common/city.c"
+ALG = ts
+
+all: cpu cuda
+
+cpu: $(ALG).c
+	gcc -Wall $(ALG).c $(COMMON) -o $(ALG)_cpu
+
+cuda:
+	nvcc $(ALG)_cuda.cu $(COMMON) -o $(ALG)_gpu
+
+clean:
+	rm -rf $(ALG)_cpu $(ALG)_gpu result.txt

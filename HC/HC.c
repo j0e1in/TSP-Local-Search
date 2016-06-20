@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include "City.h"
+#include "../common/city.h"
 
 #define ITER_TIMES 20
 
@@ -142,7 +142,7 @@ int main(int argc, char const *argv[])
     printf("ERROR: missing input argument\n");
   }
 
-  fw = fopen("output", "w");
+  fw = fopen("result.txt", "w");
 
   // READ HEADER
   for (i = 0; i < 5; ++i)
