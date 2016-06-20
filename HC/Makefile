@@ -1,12 +1,12 @@
-COMMON = "../common/city.c"
+COMMON = ../common/city.c
 ALG = hc
 
 all: cpu cuda
 
 cpu: $(ALG).c
-	gcc -Wall $(ALG).c $(COMMON) -o $(ALG)_cpu
+	gcc $(ALG).c $(COMMON) -o $(ALG)_cpu
 
-cuda:
+cuda: $(ALG)_cuda.cu
 	nvcc $(ALG)_cuda.cu $(COMMON) -o $(ALG)_gpu
 
 clean:

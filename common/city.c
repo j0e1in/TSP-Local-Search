@@ -6,12 +6,12 @@
 #include <time.h>
 #include "City.h"
 
-// READ NORMAL FORMAT CITIES (integer, 51 & 105 cities)
+// READ NORMAL FORMAT OF CITIES (integer, 51 & 105 cities)
 int** readNorm(FILE *f, int dim)
 {
   int i;
   int **city;
-  char string[LINE_LEN];
+  char string[LEN_MAX];
 
   city = (int**) malloc(sizeof(int*)*dim);
   for (i = 0; i < dim; ++i)
@@ -19,29 +19,26 @@ int** readNorm(FILE *f, int dim)
     city[i] = (int*) malloc(sizeof(int)*2);
   }
 
-  fgets(string, LINE_LEN, f); // to skip "NODE_COORD_SECTION"
+  fgets(string, LEN_MAX, f); // to skip "NODE_COORD_SECTION"
   for (i = 0; i < dim; ++i)
   {
-    fgets(string, LINE_LEN, f);
+    fgets(string, LEN_MAX, f);
     strtok(string, " "); // to remove first number
 
     city[i][0] = atoi(strtok(NULL, " \n"));
     city[i][1] = atoi(strtok(NULL, " \n"));
 
-    // printf("%d %d\n", city[i][0], city[i][1]);
   }
-  // printf("\nBEGIN NODE\t: [%d,%d]\n", city[0][0], city[0][1]);
-  // printf("END NODE\t: [%d,%d]\n\n", city[i-1][0], city[i-1][1]);
 
   return city;
 }
 
-// READ EXPONENTIAL FORMAT CITIES (442 cities)
+// READ EXPONENTIAL FORMAT OF CITIES (442 cities)
 int** readExp(FILE *f, int dim)
 {
   int i;
   int **city;
-  char string[LINE_LEN];
+  char string[LEN_MAX];
   char tmp[2][50];
 
   city = (int**) malloc(sizeof(int*)*dim);
@@ -50,10 +47,10 @@ int** readExp(FILE *f, int dim)
     city[i] = (int*) malloc(sizeof(int)*2);
   }
 
-  fgets(string, LINE_LEN, f);     // to skip "NODE_COORD_SECTION"
+  fgets(string, LEN_MAX, f);     // to skip "NODE_COORD_SECTION"
   for (i = 0; i < dim; ++i)
   {
-    fgets(string, LINE_LEN, f);
+    fgets(string, LEN_MAX, f);
     strtok(string, " ");          // to remove first number
 
     strcpy(tmp[0], strtok(NULL, " \n"));
@@ -62,9 +59,6 @@ int** readExp(FILE *f, int dim)
     city[i][0] = convertExptoInt(tmp[0]);
     city[i][1] = convertExptoInt(tmp[1]);
   }
-  // printf("\nBEGIN NODE\t: [%d,%d]\n", city[0][0], city[0][1]);
-  // printf("END NODE\t: [%d,%d]\n\n", city[i-1][0], city[i-1][1]);
-
   return city;
 }
 
@@ -137,11 +131,45 @@ void shuffle(int *arry, int n)
   }
 }
 
+int readHeader(FILE* inputFile, FILE* resultFile)
+{
+  int i, dim = 0;
+  char header[LEN_MAX];
+  char *tmp;
+  for (i = 0; i < 5; ++i)
+  {
+    fgets(header, LEN_MAX, inputFile);
+    tmp = strtok(header, ":");
+    trim(tmp);
+    fprintf(resultFile, "%s", tmp);
 
-//========================================================//
-/** ADDTIONAL FUNCTIONS **/
+    // get number of cities
+    if (strcmp(header, "DIMENSION") == 0)
+    {
+      tmp = strtok(NULL, "\n");
+      trim(tmp);
+      dim = atoi(tmp);
+      fprintf(resultFile, ": -%d-\n", dim);
+    }else{
+      tmp = strtok(NULL, "\n");
+      fprintf(resultFile, ": %s\n", tmp);
+    }
+  }
+  return dim;
+}
 
-char* trimWS(char *str)
+float getOptValue(int dim)
+{
+  switch(dim)
+  {
+    case 51:  return (float)OPTIMA_51;
+    case 105: return (float)OPTIMA_105;
+    case 442: return (float)OPTIMA_442;
+    default: return 0;
+  }
+}
+
+char* trim(char *str)
 {
   char *end;
 
@@ -168,7 +196,7 @@ int convertExptoInt(char *str)
   float tmp_float;
   char *tmp_str;
 
-  trimWS(str);                            // to clean string
+  trim(str);                            // to clean string
   tmp_str = strtok(str, "e");             // to get float part
   tmp_float = (float)atof(tmp_str);       // convert to float
   tmp_str = strtok(NULL, "+");            // to get exp part
@@ -179,8 +207,6 @@ int convertExptoInt(char *str)
 
   return num;
 }
-
-
 
 
 

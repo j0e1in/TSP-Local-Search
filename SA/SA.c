@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
 #include <time.h>
+#include <math.h>
+
 #include "../common/city.h"
 
-#define ITER_TIMES 3
 #define MAX_TEMP 99
 #define E 2.71828183
 
@@ -134,24 +134,16 @@ float SimulatedAnnealing(float **dist, int dim)
 
 int main(int argc, char const *argv[])
 {
-  int i;
-  int dim;
-  int **city;
-  float opt_value;
-  float prec_err;
-  float **dist;
-  float best_dist;
-  char header[LINE_LEN];
-  char *tmp;
+  int trials = 1;
+  int i, dim, **city;
+  float opt_value, prec_err, best_dist, **dist;
 
   clock_t start;
   clock_t end;
 
-  /** FOR PERFORMANCE MEASURING **/
-  int succ_times;      // = times of finding optima / trials
+  int succ_times; // = times of finding optima / trials
   float run_time;
   float total_best_dist;
-  /** FOR PERFORMANCE MEASURING **/
 
   FILE *f, *fw;
   if (argc == 2)
@@ -160,86 +152,57 @@ int main(int argc, char const *argv[])
   }
   else
   {
-    printf("ERROR: missing input argument\n");
+    printf("Usage: main_cpu [alg] [data file]\n");
+    return -1;
   }
 
   fw = fopen("result.txt", "w");
 
-  // READ HEADER
-  for (i = 0; i < 5; ++i)
-  {
-    fgets(header, LINE_LEN, f);
-    tmp = strtok(header, ":");
-    trimWS(tmp);
-    fprintf(fw, "%s", tmp);
+  dim = readHeader(f, fw);
 
-    // get number of cities
-    if (strcmp(header, "DIMENSION") == 0)
-    {
-      tmp = strtok(NULL, "\n");
-      trimWS(tmp);
-      dim = atoi(tmp);
-      fprintf(fw, ": -%d-\n", dim);
-    }else{
-      tmp = strtok(NULL, "\n");
-      fprintf(fw, ": %s\n", tmp);
-    }
-  }
-
-  // READ NODES
-  if (dim == 442) // 442 NODES (Exponential format)
-  {
+  // read nodes
+  if (dim == 442)
     city = readExp(f, dim);
-  }
-  else // (Integer format)
-  {
+  else
     city = readNorm(f, dim);
-  }
 
-  // CREATE A MATRIX WITH CITY DISTANCE
   dist = getDistMatrix(city, dim);
 
-  // GET OPTIMAL VALUE
-  switch(dim)
-  {
-    case 51:  opt_value = (float)OPTIMA_51;
-              break;
-    case 105: opt_value = (float)OPTIMA_105;
-              break;
-    case 442: opt_value = (float)OPTIMA_442;
-              break;
-  }
+  // get optimal value
+  opt_value = getOptValue(dim);
+
   prec_err = opt_value*0.01;
   total_best_dist = 0;
   run_time = 0;
   succ_times = 0;
-  // ITER SEVERAL TIMES TO MEASURE PERFORMANCE
-  for (i = 0; i < ITER_TIMES; ++i)
+
+  // run serveral times to get average results
+  for (i = 0; i < trials; ++i)
   {
     start = clock();
     best_dist = SimulatedAnnealing(dist, dim);
     end = clock();
+
     run_time += (float)(end-start);
     total_best_dist += best_dist;
-    // fprintf(fw, "Shortest distance: %f\n", best_dist);
-    printf(".");
-    fflush(stdout);
+    printf("Shortest distance: %f\n", best_dist);
 
     if (best_dist <= opt_value+prec_err && best_dist >= opt_value-prec_err)
     {
       succ_times++;
     }
   }
+
   printf("\n");
   fprintf(fw, "Search Algorithm: Simulated Annealing\n");
-  fprintf(fw, "Trials: %d\n", ITER_TIMES);
-  fprintf(fw, "Average Best Distance: %f\n", (float)(total_best_dist/ITER_TIMES));
-  fprintf(fw, "Average Run Time: %f\n", (float)(run_time/ITER_TIMES)/CLOCKS_PER_SEC);
-  fprintf(fw, "Success Rate: %f\n", (float)((float)succ_times/(float)ITER_TIMES*(float)100));
-
+  fprintf(fw, "Trials: %d\n", trials);
+  fprintf(fw, "Average Best Distance: %.2f\n", ((float)total_best_dist/(float)trials));
+  fprintf(fw, "Average Run Time: %.2f\n", (float)(run_time/trials)/CLOCKS_PER_SEC);
+  fprintf(fw, "Success Rate: %f\n", (float)((float)succ_times/(float)trials*(float)100));
 
   free(dist);
   free(city);
 
+  return 0;
   return 0;
 }
