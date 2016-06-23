@@ -208,7 +208,7 @@ int main(int argc, char const *argv[])
   else
     city = readNorm(f, dim);
 
-  dist = getDistMatrix(city, dim);
+  dist = genDistMatrix(city, dim);
 
   // get optimal value
   opt_value = getOptValue(dim);

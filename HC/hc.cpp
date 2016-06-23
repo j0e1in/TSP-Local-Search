@@ -125,13 +125,18 @@ int main(int argc, char const *argv[])
   {
     f = fopen(argv[1], "r");
   }
+  else if (argc == 3)
+  {
+    f = fopen(argv[1], "r");
+    trials = atoi(argv[2]);
+  }
   else
   {
-    printf("Usage: main_cpu [alg] [data file]\n");
+    printf("Usage: main_cpu / main_gpu [alg] [data file] [trials]\n");
     return -1;
   }
 
-  fw = fopen("result.txt", "w");
+  fw = fopen("result_cpu.txt", "w");
 
   dim = readHeader(f, fw);
 
@@ -141,7 +146,7 @@ int main(int argc, char const *argv[])
   else
     city = readNorm(f, dim);
 
-  dist = getDistMatrix(city, dim);
+  dist = genDistMatrix(city, dim);
 
   // get optimal value
   opt_value = getOptValue(dim);

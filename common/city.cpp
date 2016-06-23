@@ -1,10 +1,12 @@
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <math.h>
-#include <time.h>
-#include "City.h"
+// #include <ctype.h>
+#include <random>
+#include <chrono>
+#include "city.h"
 
 // READ NORMAL FORMAT OF CITIES (integer, 51 & 105 cities)
 int** readNorm(FILE *f, int dim)
@@ -62,7 +64,7 @@ int** readExp(FILE *f, int dim)
   return city;
 }
 
-float** getDistMatrix(int **city, int dim)
+float** genDistMatrix(int **city, int dim)
 {
   int i, j;
   float **dist;
@@ -84,16 +86,16 @@ float** getDistMatrix(int **city, int dim)
   return dist;
 }
 
-float getDist(int *seq_city, float **dist, int dim)
+float getDist(int *route, float **dist, int dim)
 {
   int i;
   float total_dist = 0;
 
   for (i = 0; i < dim-1; ++i)
   {
-    total_dist += dist[seq_city[i]][seq_city[i+1]];
+    total_dist += dist[route[i]][route[i+1]];
   }
-  total_dist += dist[seq_city[i]][seq_city[0]];
+  total_dist += dist[route[i]][route[0]];
 
   return total_dist;
 }
@@ -101,34 +103,19 @@ float getDist(int *seq_city, float **dist, int dim)
 int* randRoute(int dim)
 {
   int i;
-  int *seq_city;
+  int *route;
 
-  seq_city = (int*) malloc(sizeof(int)*dim);
+  route = (int*) malloc(sizeof(int)*dim);
   for (i = 0; i < dim; ++i)
   {
-    seq_city[i] = i;
+    route[i] = i;
   }
 
-  shuffle(seq_city, dim);
-  return seq_city;
-}
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  auto gen = std::default_random_engine(seed);
+  std::shuffle(&route[0], &route[dim-1], gen);
 
-void shuffle(int *arry, int n)
-{
-  int t;
-  int i, j;
-
-  srand(time(NULL));
-  if (n > 1)
-  {
-    for (i = 0; i < n; ++i)
-    {
-      j = rand()%n; // / (RAND_MAX/(n-i)+1);
-      t = arry[j];
-      arry[j] = arry[i];
-      arry[i] = t;
-    }
-  }
+  return route;
 }
 
 int readHeader(FILE* inputFile, FILE* resultFile)

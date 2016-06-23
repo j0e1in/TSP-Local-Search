@@ -1,7 +1,7 @@
-#ifndef CITY_H
-#define CITY_H
+#ifndef CITY_CUDA_H
+#define CITY_CUDA_H
 
-#include <stdio.h>
+#include <cstdio>
 
 #define LEN_MAX 50
 #define INF 9999999
@@ -13,10 +13,10 @@
 int** readNorm(FILE *f, int dim);
 int** readExp(FILE *f, int dim);
 int readHeader(FILE* inputFile, FILE* resultFile);
-float** genDistMatrix(int **city, int dim);
-float getDist(int *seq_city, float **dist, int dim);
-int* randRoute(int dim);
+float* genDistMatrix_cuda(int **city, int dim);
 float getOptValue(int dim);
+float getDist(int *seq_city, float *dist, int dim);
+int* randRoute(int dim);
 
 // utils
 char* trim(char *str);

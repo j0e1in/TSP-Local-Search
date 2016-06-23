@@ -1,0 +1,10 @@
+NAME:  eil51
+COMMENT:  51-city problem (Christofides/Eilon)
+TYPE:  TSP
+DIMENSION: -51-
+EDGE_WEIGHT_TYPE:  EUC_2D
+Search Algorithm: Hill Climbing
+Trials: 10
+Average Best Distance: 452.32
+Average Run Time: 0.02
+Success Rate: 0.000000

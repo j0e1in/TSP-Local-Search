@@ -1,13 +1,15 @@
-COMMON = ../common/city.c
 ALG = hc
+COMMON = ../common/city.cpp
+CUDA_COMMON = ../common/city_cuda.cpp
+FLAGS = -std=c++11
 
-all: cpu cuda
+all: cpu gpu
 
-cpu: $(ALG).c
-	gcc $(ALG).c $(COMMON) -o $(ALG)_cpu
+cpu: $(ALG).cpp
+	g++ $(ALG).cpp $(FLAGS) $(COMMON) -o $(ALG)_cpu -lm
 
-cuda: $(ALG)_cuda.cu
-	nvcc $(ALG)_cuda.cu $(COMMON) -o $(ALG)_gpu
+gpu: $(ALG).cu
+	nvcc $(ALG).cu $(FLAGS) $(CUDA_COMMON) -o $(ALG)_gpu
 
 clean:
 	rm -rf $(ALG)_cpu $(ALG)_gpu result.txt
