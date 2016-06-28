@@ -12,4 +12,4 @@ gpu: $(ALG).cu
 	nvcc $(ALG).cu $(FLAGS) $(CUDA_COMMON) -o $(ALG)_gpu
 
 clean:
-	rm -rf $(ALG)_cpu $(ALG)_gpu result.txt
+	rm -rf $(ALG)_cpu $(ALG)_gpu result*

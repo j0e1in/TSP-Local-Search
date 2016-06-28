@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-// #include <ctype.h>
 #include <random>
 #include <chrono>
 #include "city.h"
@@ -154,6 +153,37 @@ float getOptValue(int dim)
     case 442: return (float)OPTIMA_442;
     default: return 0;
   }
+}
+
+int* twoOptSwap(int *route, int dim, int m, int n)
+{
+  /** Neighbor is defined as two of cities swapped
+   *  (2-Opt swap)
+   **/
+  int i, j;
+  int *route_new;
+
+  route_new = new int[dim];
+
+  // Add route[0] to route[m-1] to route_new in order
+  for (i = 0; i <= m-1; ++i)
+  {
+    route_new[i] = route[i];
+  }
+
+  // Add route[m] to route[n] to route_new in reverse order
+  for (i = m, j = n; i <= n; ++i, --j)
+  {
+    route_new[i] = route[j];
+  }
+
+  // Add route[n+1] to route[dim-1] to route_new in order
+  for (i = n+1; i < dim; ++i)
+  {
+    route_new[i] = route[i];
+  }
+
+  return route_new;
 }
 
 char* trim(char *str)

@@ -1,0 +1,4 @@
+result_*
+*_cpu
+*_gpu
+.DS_Store

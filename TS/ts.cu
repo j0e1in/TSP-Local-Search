@@ -6,6 +6,29 @@
 #include "../common/city_cuda.h"
 #include "../common/helper_cuda.h"
 
+
+int getTriangularIdx(int dim, int row, int col)
+{
+    return (dim * row) + col - (row * (row+1) / 2);
+}
+
+void updateTabuList(int *tabuList, int dim)
+{
+    for (int i = 0; i < dim*(dim+1)/2; i++)
+    {
+        if (tabuList[i] > 0)
+            tabuList[i]--;
+    }
+}
+
+int notInTabuList(int *tabu_list, int dim, int i, int j)
+{
+    if (tabu_list[getTriangularIdx(dim, i, j)] > 0)
+        return false;
+    else
+        return true;
+}
+
 __device__ float twoOptSwap_dist(int *route, float *distArr, int dim, int m, int n)
 {
     float newRouteDist = 0;
@@ -39,7 +62,7 @@ __global__ void searchChild(int *route, float *distArr, int dim, simpleChild_t *
     }
 }
 
-child_t* bestChild(child_t *parent, float *distArr, int dim)
+child_t* bestChild(child_t *parent, float *distArr, int dim, int *tabuList, child_t *bestSoFar)
 {
     child_t *bestChild;
     bestChild = new child_t();
@@ -75,50 +98,68 @@ child_t* bestChild(child_t *parent, float *distArr, int dim)
     {
         for (int j = i+1; j < dim; ++j)
         {
-            // if (i < j)
-            // {
-            //     printf("%f\n", h_children[i*dim+j].dist);
-            // }
-            if (h_children[i*dim+j].dist < tmpChild.dist)
-            {
+            // printf("%f\n", h_children[i*dim+j].dist);
+            if (h_children[i*dim+j].dist < bestSoFar->dist)
+            {   // if is better than the global best, ignore the tabu list
                 tmpChild = h_children[i*dim+j];
+            }
+            else if (notInTabuList(tabuList, dim, i, j))
+            {
+                if (h_children[i*dim+j].dist < tmpChild.dist)
+                {
+                    tmpChild = h_children[i*dim+j];
+                }
             }
         }
     }
-    bestChild->route = twoOptSwap(parent->route, dim , tmpChild.i, tmpChild.j);
+
+    int tabu_turns = dim * 0.1;
+    tabuList[getTriangularIdx(dim, tmpChild.i, tmpChild.j)] += tabu_turns;
+
+    bestChild->route = twoOptSwap(parent->route, dim, tmpChild.i, tmpChild.j);
     bestChild->dist = getDist(bestChild->route, distArr, dim);
+
+    if (parent->dist > bestSoFar->dist)
+    {
+        free(parent);
+    }
 
     free(h_children);
 
     return bestChild;
 }
 
-float HillClimbing(float *distArr, int dim)
+float TabuSearch(float *distArr, int dim)
 {
-    int improved = true;
+    int i, no_improve;
+    int *tabuList;
     float best_dist;
-    child_t *bestSoFar, *tmpChild;
+    child_t *tmpChild, *bestSoFar;
+
+    // Init tabu list, a 2D triangle list
+    tabuList = new int[dim*(dim+1)/2];
+    for (i = 0; i < dim*(dim+1)/2; ++i)
+    {
+       tabuList[i] = 0;
+    }
 
     bestSoFar = new child_t();
     bestSoFar->route = randRoute(dim);
     bestSoFar->dist = getDist(bestSoFar->route, distArr, dim);
+    tmpChild = bestSoFar;
 
-    // iterate until reaching the local optima
-    while(improved)
+    no_improve = 0;
+    while(no_improve < 100)
     {
-        improved = false;
-        tmpChild = bestChild(bestSoFar, distArr, dim);
-
+        tmpChild = bestChild(tmpChild, distArr, dim, tabuList, bestSoFar);
         if (tmpChild->dist < bestSoFar->dist)
         {
             free(bestSoFar);
             bestSoFar = tmpChild;
-            improved = true;
+            no_improve = 0;
         }
-        else
-        {
-            free(tmpChild);
-        }
+        else no_improve++;
+        updateTabuList(tabuList, dim);
     }
     best_dist = bestSoFar->dist;
     free(bestSoFar);
@@ -151,7 +192,7 @@ int main(int argc, char const *argv[])
     }
     else
     {
-        printf("Usage: hc_gpu [data file] [trials]\n");
+        printf("Usage: ts_gpu [data file] [trials]\n");
         return -1;
     }
 
@@ -178,7 +219,7 @@ int main(int argc, char const *argv[])
     for (i = 0; i < trials; ++i)
     {
         start = clock();
-        best_dist = HillClimbing(distArr, dim);
+        best_dist = TabuSearch(distArr, dim);
         end = clock();
 
         run_time += (float)(end-start);

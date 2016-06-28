@@ -5,36 +5,6 @@
 
 #include "../common/city.h"
 
-int* twoOptSwap(int *route, int dim, int m, int n)
-{
-  /** Neighbor is defined as two of cities swapped
-   *  (2-Opt swap)
-   **/
-  int i, j;
-  int *route_new;
-
-  route_new = (int*) malloc(sizeof(int)*dim);
-
-  // Add route[0] to route[m-1] to route_new in order
-  for (i = 0; i <= m-1; ++i)
-  {
-    route_new[i] = route[i];
-  }
-
-  // Add route[m] to route[n] to route_new in reverse order
-  for (i = m, j = n; i <= n; ++i, --j)
-  {
-    route_new[i] = route[j];
-  }
-
-  // Add route[n+1] to route[dim-1] to route_new in order
-  for (i = n+1; i < dim; ++i)
-  {
-    route_new[i] = route[i];
-  }
-
-  return route_new;
-}
 
 int* bestChild(int *route, float **dist, int dim)
 {
@@ -132,7 +102,7 @@ int main(int argc, char const *argv[])
   }
   else
   {
-    printf("Usage: main_cpu / main_gpu [alg] [data file] [trials]\n");
+    printf("Usage: hc_cpu [data file] [trials]\n");
     return -1;
   }
 

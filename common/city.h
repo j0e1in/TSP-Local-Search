@@ -17,6 +17,7 @@ float** genDistMatrix(int **city, int dim);
 float getDist(int *seq_city, float **dist, int dim);
 int* randRoute(int dim);
 float getOptValue(int dim);
+int* twoOptSwap(int *route, int dim, int m, int n);
 
 // utils
 char* trim(char *str);

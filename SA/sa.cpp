@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+// #include <chrono>
 
 #include "../common/city.h"
 
@@ -16,36 +17,6 @@ float schedule(float temp, int iter)
     temp = temp*0.95;
   }
   return temp;
-}
-
-int* twoOptSwap(int *route, int dim, int m, int n)
-{
-  /** Neighbor is defined as two of cities swapped
-   *  (2-Opt swap)
-   **/
-  int i, j;
-  int *route_new;
-  route_new = (int*) malloc(sizeof(int)*dim);
-
-  // Add route[0] to route[m-1] to route_new in order
-  for (i = 0; i <= m-1; ++i)
-  {
-    route_new[i] = route[i];
-  }
-
-  // Add route[m] to route[n] to route_new in reverse order
-  for (i = m, j = n; i <= n; ++i, --j)
-  {
-    route_new[i] = route[j];
-  }
-
-  // Add route[n+1] to route[dim-1] to route_new in order
-  for (i = n+1; i < dim; ++i)
-  {
-    route_new[i] = route[i];
-  }
-
-  return route_new;
 }
 
 int* randChild(int *route, float **dist, int dim)
@@ -78,14 +49,12 @@ float SimulatedAnnealing(float **dist, int dim)
   float cur_dist = (float)INF;
   float next_dist = (float)INF;
 
-  srand(time(NULL));
-
   route = randRoute(dim);
   cur_dist = best_so_far = getDist(route, dist, dim);
 
   no_improve = 0;
   iter = 0;
-  while(no_improve < 600)
+  while(no_improve < 500)
   {
     temp = schedule(temp, iter);
     iter++;
@@ -150,13 +119,18 @@ int main(int argc, char const *argv[])
   {
     f = fopen(argv[1], "r");
   }
+  else if (argc == 3)
+  {
+    f = fopen(argv[1], "r");
+    trials = atoi(argv[2]);
+  }
   else
   {
-    printf("Usage: main_cpu [alg] [data file]\n");
+    printf("Usage: main_cpu / main_gpu [alg] [data file] [trials]\n");
     return -1;
   }
 
-  fw = fopen("result.txt", "w");
+  fw = fopen("result_cpu.txt", "w");
 
   dim = readHeader(f, fw);
 
@@ -203,6 +177,5 @@ int main(int argc, char const *argv[])
   free(dist);
   free(city);
 
-  return 0;
   return 0;
 }

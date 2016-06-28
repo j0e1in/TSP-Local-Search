@@ -10,6 +10,19 @@
 #define OPTIMA_105  14379
 #define OPTIMA_442  50778
 
+typedef struct child_
+{
+    int *route;
+    float dist;
+} child_t;
+
+typedef struct simpleChild_
+{
+    int i; // twoOptSwap index
+    int j; // twoOptSwap index
+    float dist;
+} simpleChild_t;
+
 int** readNorm(FILE *f, int dim);
 int** readExp(FILE *f, int dim);
 int readHeader(FILE* inputFile, FILE* resultFile);
@@ -17,6 +30,7 @@ float* genDistMatrix_cuda(int **city, int dim);
 float getOptValue(int dim);
 float getDist(int *seq_city, float *dist, int dim);
 int* randRoute(int dim);
+int* twoOptSwap(int *route, int dim, int m, int n);
 
 // utils
 char* trim(char *str);
